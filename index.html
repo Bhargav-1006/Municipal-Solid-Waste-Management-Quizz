@@ -1,0 +1,1048 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Municipal Solid Waste Management - Quiz App</title>
+  <style>
+    :root {
+      --bg-dark: #0a0e27;
+      --bg-gradient: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1729 100%);
+      --card-bg: rgba(255, 255, 255, 0.02);
+      --card-border: rgba(96, 165, 250, 0.1);
+      --accent: #60a5fa;
+      --accent-hover: #3b82f6;
+      --success: #10b981;
+      --error: #ef4444;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --glass: rgba(255, 255, 255, 0.05);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg-gradient);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 50%, rgba(96, 165, 250, 0.05) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      text-align: center;
+      padding: 50px 30px;
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      margin-bottom: 40px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #60a5fa, #3b82f6, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 15px;
+      animation: gradient 5s ease infinite;
+      background-size: 200% 200%;
+    }
+
+    @keyframes gradient {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .week-selector {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .week-selector label {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .week-selector select {
+      padding: 14px 50px 14px 24px;
+      border-radius: 12px;
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      border: 2px solid var(--card-border);
+      color: var(--text-primary);
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2360a5fa' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 15px center;
+      background-size: 20px;
+      min-width: 280px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .week-selector select:hover {
+      border-color: var(--accent);
+      background-color: rgba(96, 165, 250, 0.05);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(96, 165, 250, 0.15);
+    }
+
+    .week-selector select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1);
+    }
+
+    .week-selector select option {
+      background: #1e293b;
+      color: var(--text-primary);
+      padding: 12px;
+    }
+
+    .quiz-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      display: none;
+    }
+
+    .quiz-container.active {
+      display: block;
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      margin-bottom: 40px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #60a5fa, #3b82f6, #10b981);
+      background-size: 200% 100%;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 0%;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+      animation: progressShine 2s infinite;
+    }
+
+    @keyframes progressShine {
+      0%, 100% { background-position: 0% 0%; }
+      50% { background-position: 100% 0%; }
+    }
+
+    .question-counter {
+      text-align: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 30px;
+      animation: slideIn 0.6s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .question-block {
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      padding: 40px;
+      margin-bottom: 30px;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      animation: slideIn 0.6s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .question-block::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, var(--accent), var(--success));
+      border-radius: 20px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
+    }
+
+    .question-block:hover::before {
+      opacity: 0.1;
+    }
+
+    .question-text {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 30px;
+      color: var(--text-primary);
+      line-height: 1.7;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .option-label {
+      display: flex;
+      align-items: flex-start;
+      padding: 20px 24px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 2px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: fadeInUp 0.5s ease forwards;
+      opacity: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .option-label::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: var(--accent);
+      transform: scaleY(0);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .option-label:nth-child(1) { animation-delay: 0.1s; }
+    .option-label:nth-child(2) { animation-delay: 0.2s; }
+    .option-label:nth-child(3) { animation-delay: 0.3s; }
+    .option-label:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .option-label:hover {
+      background: rgba(96, 165, 250, 0.08);
+      border-color: rgba(96, 165, 250, 0.3);
+      transform: translateX(10px);
+      box-shadow: 0 8px 20px rgba(96, 165, 250, 0.15);
+    }
+
+    .option-label:hover::before {
+      transform: scaleY(1);
+    }
+
+    .option-label.selected {
+      background: rgba(96, 165, 250, 0.15);
+      border-color: var(--accent);
+      transform: scale(1.02);
+      box-shadow: 0 10px 30px rgba(96, 165, 250, 0.2);
+    }
+
+    .option-label.selected::before {
+      transform: scaleY(1);
+    }
+
+    .option-label.correct-answer {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: var(--success);
+      animation: correctPulse 0.6s ease;
+    }
+
+    .option-label.correct-answer::before {
+      background: var(--success);
+      transform: scaleY(1);
+    }
+
+    @keyframes correctPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); box-shadow: 0 0 30px rgba(16, 185, 129, 0.4); }
+    }
+
+    .option-label input[type="radio"] {
+      margin-right: 16px;
+      margin-top: 4px;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      flex-shrink: 0;
+      accent-color: var(--accent);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 35px;
+    }
+
+    .btn {
+      padding: 16px 40px;
+      font-size: 17px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      color: #ffffff;
+      position: relative;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(96, 165, 250, 0.4);
+    }
+
+    .submit-btn:active:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:disabled {
+      background: linear-gradient(135deg, #4b5563, #374151);
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .next-btn {
+      background: linear-gradient(135deg, var(--success), #059669);
+      color: #ffffff;
+      display: none;
+    }
+
+    .next-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+    }
+
+    .feedback {
+      display: none;
+      margin-top: 30px;
+      padding: 25px;
+      border-radius: 16px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: 600;
+      animation: zoomIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(10px);
+    }
+
+    @keyframes zoomIn {
+      from { 
+        opacity: 0; 
+        transform: scale(0.8);
+      }
+      to { 
+        opacity: 1; 
+        transform: scale(1);
+      }
+    }
+
+    .feedback.correct {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border: 2px solid rgba(16, 185, 129, 0.4);
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+    }
+
+    .feedback.wrong {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 2px solid rgba(239, 68, 68, 0.4);
+      box-shadow: 0 10px 30px rgba(239, 68, 68, 0.2);
+    }
+
+    .correct-answer-display {
+      margin-top: 20px;
+      padding: 20px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+      color: #86efac;
+      font-size: 17px;
+      text-align: left;
+      animation: slideInFromBottom 0.5s ease;
+    }
+
+    @keyframes slideInFromBottom {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .correct-answer-display strong {
+      color: #6ee7b7;
+      font-size: 18px;
+    }
+
+    .final-report {
+      display: none;
+      text-align: center;
+      padding: 50px;
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      animation: fadeIn 0.6s ease;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .final-report h2 {
+      font-size: 36px;
+      background: linear-gradient(135deg, #60a5fa, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 25px;
+    }
+
+    .final-score {
+      font-size: 56px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--success));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 25px 0;
+      animation: scaleUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes scaleUp {
+      from {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .score-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      margin-top: 40px;
+    }
+
+    .score-card {
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeInUp 0.8s ease forwards;
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s ease;
+    }
+
+    .score-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .score-card:nth-child(1) { animation-delay: 0.2s; opacity: 0; }
+    .score-card:nth-child(2) { animation-delay: 0.4s; opacity: 0; }
+
+    .score-card h3 {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-card .value {
+      font-size: 42px;
+      font-weight: 800;
+    }
+
+    .score-card.correct .value {
+      color: #6ee7b7;
+    }
+
+    .score-card.wrong .value {
+      color: #fca5a5;
+    }
+
+    .restart-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      color: #ffffff;
+      margin-top: 40px;
+    }
+
+    .restart-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(96, 165, 250, 0.4);
+    }
+
+    .welcome-screen {
+      text-align: center;
+      padding: 80px 40px;
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      max-width: 700px;
+      margin: 0 auto;
+      animation: fadeIn 1s ease;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .welcome-screen h2 {
+      font-size: 28px;
+      background: linear-gradient(135deg, var(--accent), var(--success));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 25px;
+      font-weight: 700;
+    }
+
+    .welcome-screen p {
+      font-size: 18px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 24px;
+      }
+
+      .week-selector {
+        flex-direction: column;
+      }
+
+      .week-selector select {
+        width: 100%;
+        min-width: auto;
+      }
+
+      .question-block {
+        padding: 25px;
+      }
+
+      .score-details {
+        grid-template-columns: 1fr;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🌍 Municipal Solid Waste Management Quiz</h1>
+      <div class="week-selector">
+        <label>📚 Select Week:</label>
+        <select id="weekSelect">
+          <option value="">-- Choose a Week --</option>
+          <option value="week0">Week 0 - Prerequisite</option>
+          <option value="week1">Week 1</option>
+          <option value="week2">Week 2</option>
+          <option value="week3">Week 3</option>
+          <option value="week4">Week 4</option>
+          <option value="week5">Week 5</option>
+          <option value="week6">Week 6</option>
+          <option value="week7">Week 7</option>
+          <option value="week8">Week 8</option>
+          <option value="week9">Week 9</option>
+          <option value="week10">Week 10</option>
+          <option value="week11">Week 11</option>
+          <option value="week12">Week 12</option>
+          <option value="custom">🎲 All Questions (Random)</option>
+        </select>
+      </div>
+    </header>
+
+    <div class="welcome-screen" id="welcomeScreen">
+      <h2>✨ Welcome to the Quiz! ✨</h2>
+      <p>Select a week from the dropdown above to start your quiz journey. You can choose individual weeks or attempt all questions in random order for the ultimate challenge!</p>
+    </div>
+
+    <div class="quiz-container" id="quizContainer">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      
+      <div class="question-counter" id="questionCounter"></div>
+      
+      <div id="quizArea">
+        <div class="question-block">
+          <div class="question-text" id="questionText"></div>
+          <div class="options" id="optionsContainer"></div>
+        </div>
+        
+        <div class="feedback" id="feedback"></div>
+        
+        <div class="button-group">
+          <button class="btn submit-btn" id="submitBtn">Submit Answer</button>
+          <button class="btn next-btn" id="nextBtn">Next Question</button>
+        </div>
+      </div>
+
+      <div class="final-report" id="finalReport">
+        <h2>🎉 Quiz Complete! 🎉</h2>
+        <div class="final-score" id="finalScore"></div>
+        <p style="font-size: 20px; color: var(--text-secondary); font-weight: 500;" id="totalQuestions"></p>
+        
+        <div class="score-details">
+          <div class="score-card correct">
+            <h3>✅ Correct Answers</h3>
+            <div class="value" id="correctCount"></div>
+          </div>
+          <div class="score-card wrong">
+            <h3>❌ Wrong Answers</h3>
+            <div class="value" id="wrongCount"></div>
+          </div>
+        </div>
+        
+        <button class="btn restart-btn" onclick="location.reload()">🔄 Start New Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // All questions from all weeks
+    const allQuestions = {
+      week0: [
+        {text: "Municipal solid waste includes", options: ["residential, institutional and commercial waste.", "institutional, industrial and commercial waste.", "construction and demolition, biomedical, industrial waste.", "E-waste, biomedical and residential waste"], correct: 0},
+        {text: "Correct order of solid waste management is", options: ["transportation, collection, treatment, disposal.", "collection, treatment, transportation, disposal.", "collection, transportation, treatment, disposal.", "transportation, treatment, collection, disposal."], correct: 2},
+        {text: "After which initiative segregation of waste at source came into praactice? Assign", options: ["Unnat Bharat Abhiyan (UBA)", "Swachh Bharat Mission (SBM)", "Swachh Bharat Abhiyan(SBA)", "Waste Management Policy (WMP)"], correct: 1},
+        {text: "Biogas is majorly composed of", options: ["carbon dioxide and hydrogen", "methane and carbon dioxide", "hydrogen and nitrogen", "methane and hydrogen"], correct: 1},
+        {text: "What to do with plastic wastes?", options: ["Composting", "Recycling", "Disposal in dump yard", "Underground storage"], correct: 1},
+        {text: "Technologies used for energy production,", options: ["Biomethanation and Incineration", "Incineration and Composting", "Composting and Biomethanation", "Composting and Pyrolysis"], correct: 0}
+      ],
+      week1: [
+        {text: "In which of the following conditions can we expect the highest rate of waste generation?", options: ["hilly area with warm weather", "plain area with cold weather", "hilly area with cold weather", "plain area with warm weather"], correct: 3},
+        {text: "Statement 1: Collection frequency affects the waste generation rate. Statement 2: More wastes are generated in areas where collection frequency is high", options: ["Both statement 1 and statement 2 are correct", "Statement 1 is correct, but statement 2 is wrong", "Statement 1 is wrong, but statement 2 is correct", "Both Statement 1 and statement 2 are wrong"], correct: 0},
+        {text: "Methods used to estimate waste quantity:", options: ["Load-Count analysis", "Field capacity", "Quartering Method", "Weight-Volume analysis", "Load-Count analysis, Weight-Volume analysis"], correct: 4},
+        {text: "Variation in the waste composition depends on:", options: ["Location", "Season", "Economy", "All of these"], correct: 3},
+        {text: "Which of the following states has the highest waste collection efficiency in India (CPCB, 2013)?", options: ["Kerala", "Maharashtra", "Karnataka", "West Bengal"], correct: 1},
+        {text: "Statement 1: Understanding the field capacity of waste is important in determining leachate formation in a landfill. Statement 2: The field capacity doesn't depend on the state of the decomposition of the waste.", options: ["Both statement 1 and statement 2 are correct", "Statement 1 is correct, but statement 2 is wrong", "Statement 1 is wrong, but statement 2 is correct", "Both statement 1 and statement 2 are wrong"], correct: 1},
+        {text: "Statement 1: Volatile solids content is often used as a measure of the biodegradability of the organic fraction of solid waste. Statement 2: Volatile solids content is an exact indicator of biodegradability.", options: ["Both statement 1 and statement 2 are correct", "Statement 1 is correct, but statement 2 is wrong", "Statement 1 is wrong, but statement 2 is correct", "Both Statement 1 and statement 2 are wrong"], correct: 1},
+        {text: "Waste quantification is an important aspect of SWM because it helps in:", options: ["Selecting specific equipment", "Designing waste collection routes", "Designing material recovery facilities and disposal facilities", "All of these"], correct: 3},
+        {text: "Which of the following waste characterisation techniques analyses the proportion of carbon, hydrogen, oxygen, nitrogen and sulphur?", options: ["Proximate analysis", "Ultimate analysis", "Calorific value", "None of these"], correct: 1},
+        {text: "The instrumental calorific value of the organic components in MSW is determined using:", options: ["CHONS analyser", "Full-scale boiler as a calorimeter", "Laboratory bomb calorimeter", "Full-scale boiler as a calorimeter, Laboratory bomb calorimeter", "None of these"], correct: 3}
+      ],
+      week2: [
+        {text: "In the functional element of Municipal Solid Waste Management, processing and transformation are followed by:", options: ["Transfer and transport", "Secondary collection", "Disposal", "Storage"], correct: 2},
+        {text: "Which type of waste needs to be discarded in blue bins for segregation of household waste?", options: ["Soiled tissues, paper, cardboard, and discarded clothing.", "Paper, cardboard, plastics, wood, metals, glass.", "E-waste, household medical waste, batteries, and light bulbs.", "Soiled tissues, food wrappers, paper towels, fish, and meat"], correct: 1},
+        {text: "What is the maximum distance between a house and a nearest dustbin for waste storage?", options: ["250 m", "500 m", "100 m", "50 m"], correct: 0},
+        {text: "Which is the most common onsite processing operations used at residential dwellings for dry waste?", options: ["Incineration", "Composting", "Anaerobic digestion", "Vermicomposting"], correct: 0},
+        {text: "What are the processing technologies used for sanitary waste?", options: ["Gasification", "Anaerobic digestion", "Gasification and Incineration", "Autoclaving and incineration"], correct: 3},
+        {text: "What are the techniques used to speed up the composting process?", options: ["Addition of more waste", "Maintaining optimum ratio of wet and dry waste", "Addition of microorganism", "Reducing the moisture content to 20 percent"], correct: 2},
+        {text: "Which type of composting is done only at the household level?", options: ["In-vessel composting", "Pile composting", "Vermicomposting", "Pit composting"], correct: 0},
+        {text: "Which of the following is included in the secondary collection of waste?", options: ["Curb Services", "Alley Services", "Setout services", "Haul container system"], correct: 3},
+        {text: "In which waste collection services is the homeowner responsible for returning the containers to their storage location?", options: ["Backyard services", "Setout services", "Setout-setback services", "Door to door services"], correct: 1},
+        {text: "In which collection services the cost due to size and time requirement is highest?", options: ["Curb services", "Alley services", "Setout setback services", "Backyard services"], correct: 2}
+      ],
+      week3: [
+        {text: "Which of the following is not a unit operation of collection system?", options: ["Pickup", "Haul", "On-site", "Off-route"], correct: 2},
+        {text: "In waste collection system, Haul Container System includes", options: ["Time required to reach the location where the waste will be emptied", "Actual picking up of the loaded container", "Redeposition of the empty container", "Time spent at the location where the waste is unloaded"], correct: 0},
+        {text: "In waste collection system, Off-route collection system includes", options: ["Redeposition of the empty container", "Time spent at the site", "Actual picking up of the loaded container", "Time spent on all non-productive activities"], correct: 3},
+        {text: "Estimate the average pickup time for the hauled container system?", options: ["0.113 h/trip", "0.133 h/trip", "0.331 h/trip", "0.131 h/trip"], correct: 1},
+        {text: "Estimate the time required per week (Tw) as a function of the round-trip haul distance for hauled container system?", options: ["1.74+0.12xd/wk", "1.47+0.12 xd/wk", "1.74+0.21 xd/wk", "1.27+0.12 xd/wk"], correct: 0},
+        {text: "Estimate the weekly operational cost as a function of round-trip haul distance for hauled container system?", options: ["44044.64+1024.32(x)", "40346.64+1024.32(x)", "43046.64+1024.32(x)", "46446.64+1024.32(x)"], correct: 2},
+        {text: "Estimate the number of containers emptied per trip?", options: ["11 containers/trip", "10 containers/trip", "12 containers/trip", "9 containers/trip"], correct: 0},
+        {text: "Estimate the pickup time per container for the stationary container system?", options: ["1.45h/trip", "2.22h/trip", "1.12h/trip", "1.22h/trip"], correct: 3},
+        {text: "Estimate the No. of trips required per week?", options: ["4 trips/week", "5 trips/week", "6 trips/week", "3 trips/week"], correct: 1},
+        {text: "Estimate the time required per week, Tw, as a function of the round-trip haul distance for stationary container system?", options: ["0.29+0.10x d/wk", "0.92+0.01x d/wk", "0.01+0.92x d/wk", "0.09+0.01x d/wk"], correct: 1}
+      ],
+      week4: [
+        {text: "What is the requirement for setting up of an economic transfer station?", options: ["A disposal sites more than 10 km far from city boundary and smaller vehicles are used for transportation of waste.", "A disposal sites more than 10 km far from city boundary and transportation of waste by railroads.", "A disposal sites of 3 km far from city boundary and smaller vehicles are used for transportation of waste.", "A disposal sites more than 10 km far from city boundary and large dumpster are used for transportation of waste."], correct: 0},
+        {text: "If the quantity of waste generated is low, waste separation can be done at", options: ["Material Recovery Facility", "Separation at the source", "After dumping in the landfill", "None of these"], correct: 1},
+        {text: "Which of the following does NOT require size reduction of waste?", options: ["Reduce storage", "Reduce shipping cost", "To get uniform product", "To reduce volume"], correct: 3},
+        {text: "Screening is the process of", options: ["Separation of waste of different densities", "Separation of waste of different volume", "Separation of waste of different sizes", "Separation of waste of different mass"], correct: 2},
+        {text: "Which type of waste separator is used for separation of light material from heavy material based on weight?", options: ["Screening", "Density separator", "Magnetic separator", "None of these"], correct: 1},
+        {text: "What is the technique used to store and transport waste cheaply?", options: ["Shredding", "Conveyors", "Hydraulic and pneumatic system", "Densification"], correct: 3},
+        {text: "What is the requirement of a waste drop off centre?", options: ["The waste generator is not responsible to carry the waste to the collection station", "The waste producer has to carry the waste to the collection centre", "The waste producer can purchase the recyclable material", "None of these"], correct: 1},
+        {text: "Waste such as HDPE or PET are usually separated by", options: ["Air classification", "Density blower", "Conveyor", "Eddy current separator"], correct: 0},
+        {text: "Which among the following are non-recyclable plastics?", options: ["Low density polyethylene", "Polypropylene", "Composite plastics", "Polystyrene"], correct: 2},
+        {text: "What are the stages of glass recycling process?", options: ["Segregation, glass breaking, trommel, primary rotary screen, secondary rotary screen size classifier, fluidized bed dryer, pulveriser", "Segregation, glass breaking, trommel, fluidized bed dryer, pulveriser, primary rotary screen, secondary rotary screen size classifier", "Segregation, glass breaking, trommel, fluidized bed dryer, primary rotary screen, pulveriser, secondary rotary screen size classifier", "Segregation, trommel, glass breaking, fluidized bed dryer, primary rotary screen, pulveriser, secondary rotary screen size classifier"], correct: 2}
+      ],
+      week5: [
+        {text: "The feasibility of waste for the incineration process should have:", options: ["Moisture content <45%", "Moisture content <60%", "Moisture content <70%", "Moisture content >10%"], correct: 0},
+        {text: "Calculate the higher heating value of a solid fuel. Use the following data for calculation: Low heating value = 16 kJ/kg, Moisture content = 10%, Weight of hydrogen = 3%", options: ["516 kJ/kg", "480 kJ/kg", "916 kJ/kg", "25 kJ/kg"], correct: 2},
+        {text: "The potential for energy generation from waste depends on?", options: ["Ash content", "Calorific value", "Fixed Carbon", "Moisture content"], correct: 1},
+        {text: "What is the concentration of ash content in flue gas from a moving grate incinerator?", options: ["5-10%", "1-4%", "1-3%", "11-15%"], correct: 0},
+        {text: "Which component has higher concentration in RDF?", options: ["Organic waste", "Inert", "Glass/metal", "Combustible materials"], correct: 3},
+        {text: "Which of the incineration residue causes slagging and fouling?", options: ["Gas", "Fly ash", "Tar", "None of these"], correct: 1},
+        {text: "What are the products of the incineration of waste?", options: ["Ash, flue gas, heat", "Char, syngas, heat", "Ash, tar, heat", "Char, flue gas, heat"], correct: 0},
+        {text: "The gross calorific value of a solid fuel represents its", options: ["Net calorific value", "Lower heating value", "Higher heating value", "Lower calorific value"], correct: 2},
+        {text: "In waste characterization, which of the following parameters is not considered in a Tanner diagram?", options: ["Moisture content", "Ash content", "Volatile matter", "Fixed carbon"], correct: 3},
+        {text: "According to the CPHEEO manual, what is the minimum gas phase combustion temperature and residence time of flue gas should be maintained for MSW incineration?", options: ["850°C and 10 s, respectively", "850°C and 2 s, respectively", "1100°C and 2 s, respectively", "1100°C and 10 s, respectively"], correct: 1}
+      ],
+      week6: [
+        {text: "What are the products released after curing phase of composting?", options: ["Pathogens", "CO₂", "Humic substances", "Oxygen"], correct: 2},
+        {text: "The average bacterial population during composting is", options: ["10⁶-10¹²", "10²-10⁵", "10¹⁰-10¹⁵", "10¹²-10¹⁵"], correct: 0},
+        {text: "Which of the following are the secondary consumer present in compost?", options: ["Springtails", "Snow bugs", "Centipedes", "Predatory mites"], correct: 0},
+        {text: "In which phase of composting Pseudomonads are found?", options: ["Curing phase", "Active phase", "Lag phase", "None of these"], correct: 2},
+        {text: "What is the optimum moisture content required for composting?", options: ["20-30%", "30-40%", "40-50%", "50-60%"], correct: 3},
+        {text: "The average fungal population during composting is", options: ["10⁶-10¹²", "10²-10⁵", "10¹⁰-10¹⁵", "10¹²-10¹⁵"], correct: 1},
+        {text: "What is the desirable organic particle size for composting?", options: ["More than 1 cm", "Less than 1 cm", "1-2 cm", "2-3 cm"], correct: 1},
+        {text: "What is the ideal C/N ratio for composting?", options: ["30", "< 15", "< 30", ">30"], correct: 0},
+        {text: "Which of the following is an open process composting?", options: ["Vertical flow", "Inclined", "Batch", "Static pile"], correct: 3},
+        {text: "At what temperature the non-spore formers die during composting?", options: ["Above 65°C", "Below 65°C", "Above 20°C", "Below 20°C"], correct: 0}
+      ],
+      week7: [
+        {text: "What is the typical composting time for a silo?", options: ["7 days", "14 days", "21 days", "28 days"], correct: 1},
+        {text: "One of the limitations of the rotary drum composter is:", options: ["Short composting period", "Temperature reaches up to 65-70°C", "Less Space requirement", "Capital cost"], correct: 3},
+        {text: "What is the composting period for the rotary drum composting process?", options: ["12-20 days", "20-30 days", "30-60 days", "45-190 days"], correct: 0},
+        {text: "Which one is an important biological parameter analysed during the composting process?", options: ["Water holding capacity", "pH", "Available phosphorus", "sBOD"], correct: 3},
+        {text: "Organic acid production happens at which stage of the composting process?", options: ["Growth", "Active stabilization", "Cooling", "Maturation"], correct: 0},
+        {text: "What is the recommended fecal coliform density for compost hygienization in MPN/g?", options: ["50", "500", "5000", "50000"], correct: 1},
+        {text: "What is the maximum limit of Cd in compost as per CPCB, 2006, India, in mg/kg on dry basis?", options: ["1", "2", "5", "10"], correct: 2},
+        {text: "Which type of worm builds burrows in the upper layer of soil?", options: ["Anaciec", "Endogiec", "Epigiec", "All of these"], correct: 1},
+        {text: "What is the duration of the life cycle for Eisenia fetida?", options: ["46 days", "50 days", "60 days", "70 days"], correct: 3},
+        {text: "What is the solution if the bedding is too acidic, causing the worms to crawl through the holes of the bin in vermicomposting?", options: ["Add egg shells and cut down on the amount of citrus peels, tomatoes, coffee grounds and other acidic food waste", "Don't add any more food for a week or two", "Gently stir the entire contents to allow more air in and stop adding food waste for a week or so", "The lid can be removed or left slightly ajar to allow the contents to dry out"], correct: 0}
+      ],
+      week8: [
+        {text: "What is the sequence of the anaerobic digestion process?", options: ["Acetogenesis, Acidogenesis, Hydrolysis, Methanogenesis", "Hydrolysis, Acidogenesis, Acetogenesis, Methanogenesis", "Hydrolysis, Acidogenesis, Acetogenesis, Methanogenesis", "Fermentation, Acidogenesis, Acetogenesis, Methanogenesis"], correct: 1},
+        {text: "What is the rate-limiting step in anaerobic digestion?", options: ["Methanogenesis", "Acidogenesis", "Acetogenesis", "Hydrolysis"], correct: 3},
+        {text: "In which pH range are methanogens the most effective?", options: ["2.5-4.5", "6.5-7.5", "8.5-10.5", "10.5-12.5"], correct: 1},
+        {text: "What are the factors affecting the Anaerobic Codigestion process?", options: ["Chemical compositions of the substrates", "Temperature", "pH", "All of these"], correct: 3},
+        {text: "What happens if the C/N ratio is high in anaerobic digestion?", options: ["The digester buffer capacity becomes poor", "Concentration of ammonia increases", "Inhibits microbial growth", "None of these"], correct: 0},
+        {text: "Which of these is not a chemical pre-treatment for anaerobic digestion?", options: ["Enzyme addition", "Oxidative treatment", "Acid treatment", "None of these"], correct: 0},
+        {text: "Why is pre-treatment done for a substrate in an anaerobic digestion process?", options: ["Biomass integration", "Improved solubilization", "Decreased solubilization", "Biomass disintegration"], correct: 1},
+        {text: "In a floating drum digester, if the H:D ratio of the reactor is high, then what should be done to prevent short-circuiting?", options: ["The diameter of the inlet pipe should be increased", "The diameter of the outlet pipe should be increased", "A central baffle should be provided", "Both the inlet pipe and outlet pipe's diameter should be increased"], correct: 2},
+        {text: "Which of the following requirements should be provided if we want to install an anaerobic digester in cold climate regions?", options: ["Mixing requirement", "Heating requirement", "None of these", "Mixing and heating requirements"], correct: 3},
+        {text: "Which technology is most suitable for installing a biogas plant with a capacity greater than 2500 cubic meters per day?", options: ["Floating Dome", "Lagoon", "Fixed Dome", "None of these"], correct: 1}
+      ],
+      week9: [
+        {text: "Selection of the best-ranked sites of landfill is done based on?", options: ["Pollution load index", "Solvita index", "Site Sensitivity Index", "Bioaccumulation Index"], correct: 2},
+        {text: "Monitoring of landfill should be done ……………. years after site closure?", options: ["20-25", "10-20", "15-20", "25-30"], correct: 0},
+        {text: "What are the factors that influence the generation of leachate?", options: ["Infiltration of groundwater", "Precipitation", "All of these", "Water from the deposited waste"], correct: 2},
+        {text: "Which factor influences the leachate quality?", options: ["Elapsed time", "Available moisture", "Moisture content of waste", "All of these"], correct: 3},
+        {text: "What are the problems associated with the leachate collection system?", options: ["Groundwater infiltration", "Erosion due to high velocity", "Chemical reaction in the pipes", "All of these"], correct: 2},
+        {text: "Which one is a way of controlling leachate in landfills?", options: ["Restrict runoff water", "Anaerobic landfill technique", "Use of heterogeneous waste", "Increase landfill height"], correct: 0},
+        {text: "Which of the components of the leachate collection system is used to drain the liquid to the collector drain pipes?", options: ["Fine soil", "Slope", "Drainage layer", "French drains"], correct: 2},
+        {text: "Which of the components of the leachate collection system is used to protect against damage?", options: ["Fine soil", "Slope", "Drainage layer", "French drains"], correct: 0},
+        {text: "The minimum permeability of the drainage layer in the leachate collection system is?", options: ["10⁻³ mm/sec", "10⁻⁴ mm/sec", "10⁻³ cm/sec", "10⁻⁴ cm/sec"], correct: 2},
+        {text: "What are used to reduce odour issues in leachate treatment?", options: ["Coagulants", "Biological treatments", "Aerators", "Anaerobic filter"], correct: 2}
+      ],
+      week10: [
+        {text: "What is the sequence of decomposition phases of waste?", options: ["Aerobic, acetogenic, acidogenic, methane fermentation, maturation phase", "Acetogenic, aerobic, acidogenic, methane fermentation, maturation phase", "Aerobic, acidogenic, methane formation, acetogenic, maturation phase", "Aerobic, acidogenic, acetogenic, methane formation, maturation phase"], correct: 3},
+        {text: "Transport of landfill gas occurs by the two principal mechanisms- diffusion and __________?", options: ["Convection", "Advection", "Sedimentation", "Conduction"], correct: 1},
+        {text: "What is the primary cause of landfill gas generation?", options: ["Volatilization", "Biological decomposition", "Chemical reactions", "All of these"], correct: 3},
+        {text: "Which among the following correctly fits to define the \"Rule of 100's\" in pipeline design used in landfill gas generation systems?", options: ["Flow = 1000 cum/hr, Diameter of pipe = 10 m, length = 100 m, pressure loss = 6 mbar", "Flow = 100 cum/hr, Diameter of pipe = 100 m, length = 100 m, pressure loss = 6 mbar", "Flow = 100 cum/hr, Diameter of pipe = 0.1 m, length = 100 m, pressure loss = 8 mbar", "Flow = 100 cum/hr, Diameter of pipe = 0.1 m, length = 100 m, pressure loss = 6 mbar"], correct: 3},
+        {text: "Which one is not a correct way for the direct measurement of methane emissions from landfills?", options: ["Flux chamber testing", "Plume measurement", "Gas chromatography", "Dispersion modelling"], correct: 2},
+        {text: "In which phase do anaerobic conditions start developing during the biological decomposition of waste?", options: ["Acidogenic phase", "Acetogenic phase", "Methane fermentation phase", "Initial adjustment phase"], correct: 0},
+        {text: "Which of the following landfill gases contributes to global warming?", options: ["CO₂, CH₄, PCDD, CO", "CO₂, CFC, PAH, CO", "CO₂, CFC, PCDD, NH₃", "CO₂, CH₄, CFC, N₂O"], correct: 3},
+        {text: "To stabilize the windrows, how many turnings of legacy waste are needed?", options: ["2-4", "4-5", "3-4", "4-6"], correct: 2},
+        {text: "Identify the correct schematic representation of biomining through an excavator by making a windrow:", options: ["Excavation, windrow making, hand picking, windrow turning, screening, spraying mist spray bio culture", "Excavation, hand picking, windrow making, spraying mist spray bio culture, windrow turning, screening", "Excavation, hand picking, windrow making, windrow turning, spraying mist spray bio culture, screening", "Excavation, hand picking, spraying mist spray bio culture, windrow making, windrow turning, screening"], correct: 1},
+        {text: "In which financial year did the government of India notify the rules and provisions of Solid Waste Management (SWM)?", options: ["2014", "2015", "2016", "2017"], correct: 2}
+      ],
+      week11: [
+        {text: "How many times in a year should ambient air quality monitoring be carried out for city having population 1 to 5 million?", options: ["6", "2", "4", "1"], correct: 0},
+        {text: "Treatment of biomedical waste is governed by?", options: ["Solid waste management rules 2016", "Municipal solid waste management rules 2016", "Biomedical waste management waste 2016", "Hazardous waste management rules 2016"], correct: 2},
+        {text: "What is the capacity for disposal of e-waste for India?", options: ["6 tons/day", "10 tons/day", "2 tons/day", "5 tons/day"], correct: 3},
+        {text: "Inert waste includes which type of waste components?", options: ["Metal", "Dry leaves", "Organic waste", "Glass"], correct: 1},
+        {text: "Which sweeper has lower energy demand in street sweeping?", options: ["Vacuum sweeper", "Mechanical broom sweeper", "Regenerative sweeper", "Air sweeper"], correct: 1},
+        {text: "What is the color of the bin used for collection of Non-biodegradable waste?", options: ["Green", "White", "Black", "Red"], correct: 1},
+        {text: "What is the proposed user time for construction and demolition waste in cities with population of 1 million and above?", options: ["18 months", "24 months", "12 months", "36 months"], correct: 2},
+        {text: "What is the acceptable level of suspended particulate matter in ambient air quality at the processing site?", options: ["60 μg/m³", "40 μg/m³", "500 μg/m³", "100 μg/m³"], correct: 2},
+        {text: "What is the purpose of screening in construction and demolition waste during wet process?", options: ["To remove dirt", "To remove compact soil", "To remove loose soil and grit", "Both (a) and (b)"], correct: 2},
+        {text: "List the objectives, which are not framed according to the E-Waste Management Rules 2016?", options: ["To reuse the e-waste", "To regulate the transportation", "To regulate the generation", "To regulate the disposal of e-waste"], correct: 0}
+      ],
+      week12: [
+        {text: "Which type of cost process is associated with Aesthetic impact?", options: ["Social costs", "Operating costs", "Environmental costs", "Backend costs"], correct: 0},
+        {text: "Which cost includes the maintenance for leakage from municipal landfill?", options: ["Capital cost", "Contingent cost", "Transportation cost", "Operation & Maintenance cost"], correct: 1},
+        {text: "What is the contribution of property tax in total revenue to the ULB's?", options: ["30-35%", "15-25%", "25-30%", "20-25%"], correct: 2},
+        {text: "Which of this is not a characteristic of PPP project?", options: ["Time period", "Value for Money", "Efficiency", "Risk Transfer"], correct: 0},
+        {text: "In which sector, India is most deficit at?", options: ["Transportation deficit", "Storage deficit", "Infrastructure deficit", "All of the above"], correct: 2},
+        {text: "Under which type of model, SWM projects are mainly considered?", options: ["DBFO", "BOT", "OM", "DBO"], correct: 0},
+        {text: "Which model operates decentralized system of waste management?", options: ["BOT", "Management contract", "DBFO", "DBO"], correct: 1},
+        {text: "How many MSWM projects are currently under PPP mode in India?", options: ["30", "41", "31", "51"], correct: 2},
+        {text: "Municipal solid waste management services are conventionally financed through?", options: ["Government grants", "Revenues", "Private grants", "Both (a) and (b)"], correct: 3},
+        {text: "What provides the pathway for identifying and assessing the costs related to ISWM?", options: ["Full cost accounting", "Fixed cost accounting", "Full cost revenue", "Front end cost"], correct: 0}
+      ]
+    };
+
+    function shuffleArray(array) {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
+    }
+
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let correctAnswers = 0;
+    let wrongAnswers = 0;
+    let selectedAnswer = null;
+
+    const weekSelect = document.getElementById('weekSelect');
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const quizContainer = document.getElementById('quizContainer');
+    const questionCounter = document.getElementById('questionCounter');
+    const progressFill = document.getElementById('progressFill');
+    const questionText = document.getElementById('questionText');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const feedback = document.getElementById('feedback');
+    const submitBtn = document.getElementById('submitBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const quizArea = document.getElementById('quizArea');
+    const finalReport = document.getElementById('finalReport');
+
+    weekSelect.addEventListener('change', function() {
+      const selectedWeek = this.value;
+      if (selectedWeek) {
+        startQuiz(selectedWeek);
+      }
+    });
+
+    function startQuiz(week) {
+      welcomeScreen.style.display = 'none';
+      quizContainer.classList.add('active');
+      quizArea.style.display = 'block';
+      finalReport.style.display = 'none';
+      
+      currentQuestionIndex = 0;
+      correctAnswers = 0;
+      wrongAnswers = 0;
+      
+      if (week === 'custom') {
+        currentQuestions = [];
+        for (let w in allQuestions) {
+          currentQuestions = currentQuestions.concat(allQuestions[w]);
+        }
+        currentQuestions = shuffleArray(currentQuestions);
+      } else {
+        currentQuestions = [...allQuestions[week]];
+      }
+      
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const question = currentQuestions[currentQuestionIndex];
+      selectedAnswer = null;
+      
+      questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${currentQuestions.length}`;
+      const progress = ((currentQuestionIndex) / currentQuestions.length) * 100;
+      progressFill.style.width = progress + '%';
+      
+      questionText.textContent = question.text;
+      
+      optionsContainer.innerHTML = '';
+      question.options.forEach((option, index) => {
+        const label = document.createElement('label');
+        label.className = 'option-label';
+        label.innerHTML = `
+          <input type="radio" name="answer" value="${index}">
+          <span>${option}</span>
+        `;
+        label.addEventListener('click', function() {
+          document.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+          this.classList.add('selected');
+          selectedAnswer = index;
+          submitBtn.disabled = false;
+        });
+        optionsContainer.appendChild(label);
+      });
+      
+      feedback.style.display = 'none';
+      submitBtn.style.display = 'inline-block';
+      submitBtn.disabled = true;
+      nextBtn.style.display = 'none';
+    }
+
+    submitBtn.addEventListener('click', function() {
+      if (selectedAnswer === null) return;
+      
+      const question = currentQuestions[currentQuestionIndex];
+      const isCorrect = selectedAnswer === question.correct;
+      
+      const allOptions = document.querySelectorAll('.option-label');
+      allOptions[question.correct].classList.add('correct-answer');
+      
+      if (isCorrect) {
+        correctAnswers++;
+        feedback.className = 'feedback correct';
+        feedback.innerHTML = '✓ Yes, you are correct!';
+      } else {
+        wrongAnswers++;
+        feedback.className = 'feedback wrong';
+        const correctAnswerText = question.options[question.correct];
+        feedback.innerHTML = `
+          ✗ Oh, you are wrong!
+          <div class="correct-answer-display">
+            <strong>The correct answer is:</strong> ${correctAnswerText}
+          </div>
+        `;
+      }
+      
+      feedback.style.display = 'block';
+      submitBtn.style.display = 'none';
+      nextBtn.style.display = 'inline-block';
+      
+      document.querySelectorAll('.option-label').forEach(label => {
+        label.style.pointerEvents = 'none';
+      });
+    });
+
+    nextBtn.addEventListener('click', function() {
+      currentQuestionIndex++;
+      
+      if (currentQuestionIndex < currentQuestions.length) {
+        loadQuestion();
+      } else {
+        showFinalReport();
+      }
+    });
+
+    function showFinalReport() {
+      quizArea.style.display = 'none';
+      finalReport.style.display = 'block';
+      
+      document.getElementById('finalScore').textContent = `${correctAnswers} / ${currentQuestions.length}`;
+      document.getElementById('totalQuestions').textContent = `out of ${currentQuestions.length} questions`;
+      document.getElementById('correctCount').textContent = correctAnswers;
+      document.getElementById('wrongCount').textContent = wrongAnswers;
+      
+      progressFill.style.width = '100%';
+    }
+  </script>
+</body>
+</html>
